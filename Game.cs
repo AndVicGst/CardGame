@@ -43,15 +43,15 @@ namespace CardGame
         public List<Players>? listPlayers; //лист игроков
 
         //создаем лист игроков и для каждого свой лист карт 
-        public void listCardToPlayer(List<Cards>? _listcards, int countPlayers)
+        public void listCardToPlayer(int countPlayers)
         {
-            int cardCount = _listcards.Count; //количество карт - 36 шт
+            int cardCount = listCards.Count; //количество карт - 36 шт
             int cardToPlayer = cardCount / countPlayers; //сколько карт будет у игрока - 36/2 = 18
             List<Cards> listCardToPlayer = new List<Cards>(); //лист карт для каждого игрока - 
             listPlayers = new List<Players>(); //лист игроков         
             for (int i = 0; i < countPlayers; i++)
             {
-                listPlayers.Add(new Players()); //создаем лист обьектов класса Player
+                listPlayers.Add(new Players(i+1)); //создаем лист обьектов класса Player
                 for (int j = cardCount - 1; j >= cardCount - cardToPlayer; j--)
                 {
                     listPlayers[i].playerListCard.Add(listCards[j]); //собираем карты для игрока - в данном случае 18 шт             
@@ -73,63 +73,50 @@ namespace CardGame
                 //выводим на экран карты игроков
                 for (int i = 0; i < listPlayers.Count; i++)
                 {
-                    Console.WriteLine($"Карты игрока {i + 1}:\n");
+                    Console.WriteLine($"Карты игрока {listPlayers[i].numberPlayer} всего {listPlayers[i].playerListCard.Count} шт.:\n");
                     listPlayers[i].showCard();
                     Console.WriteLine();
                 }
-                //для сравнения карт используем SortedList
-                //куда в качестве ключа заносим номинал карты и он будет отсортирован
-                //в качестве значения - индекс игрока в listPlayer - потом по этому индексу карты или добавяться, или нет
-                int k = 1; //номера игроков
-                Dictionary<int, List<Cards>> dictListcards = new Dictionary<int, List<Cards>>();
-
-                //создаем список карт игроков на карточном столе - используется для сравнения карт - ключ номинал карты, значение - обьект игрока в listPlayer
-                for (int i = 0; i < listPlayers.Count - 1; i++)
+                int maxCardValue = 0; //будет хранить наибольший номинал карты на столе
+                int indexPlayerMaxCard = 0; //будет хранить номер игрока с наибольшей картой
+                //создаем список карт игроков на карточном столе 
+                for (int i = 0; i < listPlayers.Count; i++)
                 {
-                    Console.WriteLine($"Игрок {k++} положил карту на стол: {listPlayers[i].playerListCard[0].ToString()}");
-                    dictListcards.Add(listPlayers[i].playerListCard[0].cardValue, listPlayers[i].playerListCard);
-                    listPlayers[i].playerListCard.RemoveAt(0); //удаляем карту из List карт игрока, потом или добавятся (в результате сравнения), или нет
-                }
-                //если 1 и 2 данные по ключу в SortedList не равны, то все карты идут к игроку с индексом (значением в SortedList) соответсвующим первому ключу
-
-
-                if (dictListcards.Keys[0] != dictListcards.Keys[1]) //сравниваем 1 и 2 ключ
-                {
-                    for (int i = 0; i < dictListcards.Count - 1; i++)
-                        listPlayers[dictListcards.Keys[0]].playerListCard.Add(dictListcards.Values[i]);
-                }
-
-
-                    //по одной первой в List карте каждого игрока 
-                    
-                for (int i = 0; i < listPlayers.Count - 1; i++)
-                {
-                    Console.WriteLine($"Игрок {k++} положил карту: {listPlayers[i].playerListCard[0].ToString()}");
-
-                    //перекладываем карты 
-                    //if (listPlayers[i].playerListCard[0].cardValue > listPlayers[i + 1].playerListCard[0].cardValue)
-                    //{
-                    //    listPlayers[i].playerListCard.Add(listPlayers[i + 1].playerListCard[0]);
-                    //    listPlayers[i].playerListCard.Add(listPlayers[i].playerListCard[0]);
-                    //    listPlayers[i + 1].playerListCard.RemoveAt(0);
-                    //    listPlayers[i].playerListCard.RemoveAt(0);
-                    //}
-                    //else
-                    //{
-                    //    listPlayers[i + 1].playerListCard.Add(listPlayers[i].playerListCard[0]);
-                    //    listPlayers[i + 1].playerListCard.Add(listPlayers[i+1].playerListCard[0]);
-                    //    listPlayers[i + 1].playerListCard.RemoveAt(0);
-                    //    listPlayers[i].playerListCard.RemoveAt(0);
-                    //}
-                    Console.WriteLine();
-                    Console.Write("Нажмите любую клавишу для продолжения.\n\n");
-                    Console.ReadKey(); 
-                    if (listPlayers[i].playerListCard.Count == 0)
+                    Console.WriteLine($"Игрок {listPlayers[i].numberPlayer} положил карту на стол: {listPlayers[i].playerListCard[0].ToString()}");
+                    //ищем наибольшую карту
+                    if (maxCardValue < listPlayers[i].playerListCard[0].cardValue)
                     {
-                        endGame = true;
+                        maxCardValue = listPlayers[i].playerListCard[0].cardValue;
+                        indexPlayerMaxCard = listPlayers[i].numberPlayer-1;
                     }
                 }
+
+                //добавили в конец списка карт игроку с наибольшей картой, карты остальных игроков и его первую
+                for (int i = 0; i < listPlayers.Count; i++)
+                {
+                    if (indexPlayerMaxCard != i)
+                    {
+                        listPlayers[indexPlayerMaxCard].playerListCard.Add(listPlayers[i].playerListCard[0]);
+                    }                    
+                }
+                //добавили в конец списка карт игроку с наибольшей картой его первую по списку карту
+                listPlayers[indexPlayerMaxCard].playerListCard.Add(listPlayers[indexPlayerMaxCard].playerListCard[0]);
+
+                //удаляем первую карту из List карт игроков
+                for (int i = 0; i < listPlayers.Count; i++)
+                       listPlayers[i].playerListCard.RemoveAt(0);
+
+
+                Console.WriteLine();
+                Console.Write("Нажмите любую клавишу для продолжения.\n\n");
+                Console.ReadKey();
+
+                for (int i = 0; i < listPlayers.Count; i++)
+                {
+                    if (listPlayers[i].playerListCard.Count == 0) endGame = true; ; //конец игре если у любого игрока закончились карты                                       
+                }
             }
+
             int maxCardCountPlayer = 0; //наибольшее количество оставшихся у игроков карт - тот и победил
             int numberPlayer = 0;       //индекс победителя
             for (int i = 0; i < listPlayers.Count; i++)
@@ -146,7 +133,7 @@ namespace CardGame
         public Game(int countPlayers)
         {
             SetListCards();
-            listCardToPlayer(listCards, countPlayers);
+            listCardToPlayer(countPlayers);
             playGame();
         }
     }

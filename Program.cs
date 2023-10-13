@@ -8,7 +8,8 @@ namespace CardGame
         {
 
 
-            int countPlayers = 2; //количество игроков
+            int countPlayers = 2; //количество игроков, должно без остатка делить 36 карт поровну
+
 
             Game game = new Game(countPlayers);
 

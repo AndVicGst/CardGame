@@ -10,6 +10,13 @@ namespace CardGame
     {
         //список карт игрока
         public List<Cards> playerListCard = new List<Cards>();
+        //номер игрока
+        public int numberPlayer;
+
+        public Players(int num)
+        {
+            numberPlayer = num;
+        }
 
         //выводим список карт
         public void showCard()
